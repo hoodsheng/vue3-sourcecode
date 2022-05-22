@@ -9,9 +9,9 @@ var VueReactivity = (() => {
   };
   var __copyProps = (to, from, except, desc) => {
     if (from && typeof from === "object" || typeof from === "function") {
-      for (let key of __getOwnPropNames(from))
-        if (!__hasOwnProp.call(to, key) && key !== except)
-          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+      for (let key2 of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key2) && key2 !== except)
+          __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });
     }
     return to;
   };
@@ -21,7 +21,8 @@ var VueReactivity = (() => {
   var src_exports = {};
   __export(src_exports, {
     effect: () => effect,
-    reactive: () => reactive
+    reactive: () => reactive,
+    ref: () => ref
   });
 
   // packages/reactivity/src/effect.ts
@@ -69,15 +70,15 @@ var VueReactivity = (() => {
     return runner;
   }
   var targetMap = /* @__PURE__ */ new WeakMap();
-  function track(target, type, key) {
+  function track(target, type, key2) {
     if (activeEffect) {
       let depsMap = targetMap.get(target);
       if (!depsMap) {
         targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
       }
-      let dep = depsMap.get(key);
+      let dep = depsMap.get(key2);
       if (!dep) {
-        depsMap.set(key, dep = /* @__PURE__ */ new Set());
+        depsMap.set(key2, dep = /* @__PURE__ */ new Set());
       }
       let shouldTrack = !dep.has(activeEffect);
       if (shouldTrack) {
@@ -86,11 +87,11 @@ var VueReactivity = (() => {
       }
     }
   }
-  function trigger(target, type, key, newValue, oldValue) {
+  function trigger(target, type, key2, newValue, oldValue) {
     const depsMap = targetMap.get(target);
     if (!depsMap)
       return;
-    let effects = depsMap.get(key);
+    let effects = depsMap.get(key2);
     if (effects) {
       effects = new Set(effects);
       for (const effect2 of effects) {
@@ -112,24 +113,24 @@ var VueReactivity = (() => {
 
   // packages/reactivity/src/baseHandler.ts
   var mutablehandlers = {
-    get(target, key, receiver) {
-      if (key === "__v_isReactive" /* IS_REACTIVE */) {
+    get(target, key2, receiver) {
+      if (key2 === "__v_isReactive" /* IS_REACTIVE */) {
         return true;
       }
-      let res = Reflect.get(target, key, receiver);
-      track(target, "get", key);
+      let res = Reflect.get(target, key2, receiver);
+      track(target, "get", key2);
       console.log("\u7528\u6237\u53D6\u503C\u4E86");
       if (isObject(res)) {
         return reactive(res);
       }
       return res;
     },
-    set(target, key, value, receiver) {
+    set(target, key2, value, receiver) {
       console.log("\u7528\u6237\u8BBE\u7F6E\u4E86");
-      let oldValue = target[key];
-      const result = Reflect.set(target, key, value, receiver);
+      let oldValue = target[key2];
+      const result = Reflect.set(target, key2, value, receiver);
       if (oldValue !== value) {
-        trigger(target, "set", key, value, oldValue);
+        trigger(target, "set", key2, value, oldValue);
       }
       return result;
     }
@@ -150,6 +151,36 @@ var VueReactivity = (() => {
     const proxy = new Proxy(target, mutablehandlers);
     reactiveMap.set(target, proxy);
     return proxy;
+  }
+
+  // packages/reactivity/src/ref.ts
+  function toReactive(value) {
+    return isObject(value) ? reactive(value) : value;
+  }
+  var RefImpl = class {
+    constructor(rawValue) {
+      this.rawValue = rawValue;
+      this.dep = /* @__PURE__ */ new Set();
+      this.__v_isRef = true;
+      this._value = toReactive(rawValue);
+    }
+    get value() {
+      track(this.dep, "get", key);
+      return this._value;
+    }
+    set value(newValue) {
+      if (newValue !== this.rawValue) {
+        this._value = toReactive(newValue);
+        this.rawValue = newValue;
+        trigger(this.dep, "set", key);
+      }
+    }
+  };
+  function ref(value) {
+    return new RefImpl(value);
+  }
+  function key(dep, arg1, key2) {
+    throw new Error("Function not implemented.");
   }
   return __toCommonJS(src_exports);
 })();

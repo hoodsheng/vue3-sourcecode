@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- <script src="../../../node_modules/vue/dist/vue.global.js"></script> -->
+    <script src="./reactivity.global.js"></script>
+    <div id="app"></div>
+
+    <script>
+      // reactive只支持对象类型,ref支持多种类型(基础类型，引用类型)
+      const { ref, effect, reactive, toRefs } = VueReactivity;
+      // const flag = ref(false);
+      // effect(() => {
+      //   document.body.innerHTML = flag.value ? "hello" : "你好";
+      // });
+
+      // setTimeout(() => {
+      //   flag.value = true;
+      // }, 1000);
+
+      // ---------------------------------------------------------
+      const state = reactive({
+        name: "hood",
+        age: 18,
+      });
+      const { name, age } = toRefs(state);
+      effect(() => {
+        // 结构出来丢失响应式
+        document.getElementById(
+          "app"
+        ).innerHTML = `${name.value}今年${age.value}岁了`;
+      });
+      setTimeout(() => {
+        age.value = 20;
+      }, 1000);
+    </script>
+  </body>
+</html>
