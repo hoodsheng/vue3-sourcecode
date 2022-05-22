@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+    <script src="./reactivity.global.js"></script>
+    <div id="app"></div>
+
+    <script>
+      // 1. 手动实现reactive，将数据变成响应式
+      // ------------------------------------------------------------------------------
+      // reactivity模块
+      // effect副作用函数，如果此函数依赖的数据发生变化，会重新执行
+      // reactive 将数据变成响应式
+      // shallowReactive, shallowReadonly, readonly
+      const { effect, reactive } = VueReactivity;
+      const state = reactive({
+        name: "hood",
+        age: 18,
+        address: { num: 17 },
+      });
+      // console.log(state);
+      // console.log(state.address); // 取值的时候返回代理对象
+      effect(() => {
+        // 默认会先执行一次，对响应式取值
+        document.getElementById(
+          "app"
+        ).innerHTML = `${state.name}今年${state.age}岁了`;
+      });
+      setTimeout(() => {
+        state.age++;
+      }, 1000);
+    </script>
+  </body>
+</html>
